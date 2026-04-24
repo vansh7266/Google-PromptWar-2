@@ -1,4 +1,4 @@
-# 🗳️ VoteSmart India — Election Process Education Assistant
+# 🗳️ VoteIndiaSmart — Election Process Education Assistant
 
 An AI-powered web application that helps Indian citizens understand the election process
 in an interactive, easy-to-follow way. Built for the **Google Prompt War 2026** hackathon.

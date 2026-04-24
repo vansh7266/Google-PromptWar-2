@@ -1097,7 +1097,7 @@ ul {
 }
 
 .chat-wrapper {
-    max-width: 780px;
+    max-width: 900px;
     margin-inline: auto;
     background: var(--white);
     border-radius: var(--radius-xl);
@@ -1107,7 +1107,7 @@ ul {
 }
 
 .chat__window {
-    height: 420px;
+    height: 600px;
     overflow-y: auto;
     padding: 24px 28px;
     display: flex;

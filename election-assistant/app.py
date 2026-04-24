@@ -343,7 +343,7 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
             },
         )
 
-        reply_text = response.text.strip()
+        reply_text = response.text.replace("*", "").strip()
         logger.info("Chat reply generated. Input: %d chars.", len(body.message))
         return ChatResponse(reply=reply_text)
 

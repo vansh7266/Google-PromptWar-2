@@ -467,7 +467,7 @@ async function fetchAIExplanation(topic) {
         const avatar = document.createElement("div");
         avatar.className = "chat__avatar";
         avatar.setAttribute("aria-hidden", "true");
-        avatar.textContent = role === "bot" ? "🤖" : "👤";
+        avatar.textContent = role === "bot" ? "✨" : "👤";
 
         const bubble = document.createElement("div");
         bubble.className = "chat__bubble";
@@ -493,7 +493,7 @@ async function fetchAIExplanation(topic) {
         const avatar = document.createElement("div");
         avatar.className = "chat__avatar";
         avatar.setAttribute("aria-hidden", "true");
-        avatar.textContent = "🤖";
+        avatar.textContent = "✨";
 
         const dots = document.createElement("div");
         dots.className = "chat__typing-dots";

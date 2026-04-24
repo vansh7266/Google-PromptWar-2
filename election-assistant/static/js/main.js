@@ -9,6 +9,14 @@
 
 "use strict";
 
+// Google Translate Initialization
+window.googleTranslateElementInit = function() {
+    new google.translate.TranslateElement(
+        { pageLanguage: 'en', includedLanguages: 'hi,en,ta,te,bn,mr,gu,kn,ml,pa', layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
+        'google_translate_element'
+    );
+};
+
 /* ═══════════════════════════════════════════
    UTILITIES
 ═══════════════════════════════════════════ */

@@ -144,7 +144,7 @@ def sanitize_input(text: str) -> str:
 class ConversationTurn(BaseModel):
     """A single turn in the conversation history."""
     role: Literal["user", "assistant"]
-    content: str = Field(max_length=500)
+    content: str = Field(max_length=5000)
 
 
 class ChatRequest(BaseModel):

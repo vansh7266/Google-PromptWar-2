@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="VoteSmart India — Learn everything about India's election process interactively." />
+    <meta name="robots" content="index, follow" />
+    <title>VoteSmart India — Election Education Assistant</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap"
+        rel="stylesheet" />
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="../static/css/style.css" />
+
+    <!-- Favicon (inline SVG data URI) -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>" />
+</head>
+
+<body>
+
+    <!-- ══════════════════════════════════════
+       HEADER / NAVBAR
+  ══════════════════════════════════════ -->
+    <header class="header" id="header">
+        <nav class="nav container">
+            <a href="#" class="nav__logo" aria-label="VoteSmart India Home">
+                <span class="nav__logo-icon">🗳️</span>
+                <span class="nav__logo-text">VoteSmart <strong>India</strong></span>
+            </a>
+
+            <ul class="nav__links" role="list">
+                <li><a href="#home" class="nav__link active">Home</a></li>
+                <li><a href="#timeline" class="nav__link">Timeline</a></li>
+                <li><a href="#process" class="nav__link">Process</a></li>
+                <li><a href="#quiz" class="nav__link">Quiz</a></li>
+                <li><a href="#chat" class="nav__link">Ask AI</a></li>
+            </ul>
+
+            <a href="#chat" class="btn btn--primary nav__cta">Ask AI 🤖</a>
+
+            <!-- Mobile hamburger -->
+            <button class="nav__hamburger" id="navHamburger" aria-label="Toggle menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+        </nav>
+
+        <!-- Mobile menu -->
+        <div class="nav__mobile" id="navMobile" aria-hidden="true">
+            <ul role="list">
+                <li><a href="#home" class="nav__link">Home</a></li>
+                <li><a href="#timeline" class="nav__link">Timeline</a></li>
+                <li><a href="#process" class="nav__link">Process</a></li>
+                <li><a href="#quiz" class="nav__link">Quiz</a></li>
+                <li><a href="#chat" class="nav__link">Ask AI</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- ══════════════════════════════════════
+         HERO SECTION
+    ══════════════════════════════════════ -->
+        <section class="hero" id="home" aria-label="Hero section">
+            <div class="hero__bg-orbs" aria-hidden="true">
+                <div class="orb orb--1"></div>
+                <div class="orb orb--2"></div>
+                <div class="orb orb--3"></div>
+            </div>
+
+            <div class="container hero__content">
+                <div class="hero__badge reveal">
+                    <span>🇮🇳</span> Powered by Vertex AI (Gemini)
+                </div>
+
+                <h1 class="hero__title reveal reveal--delay-1">
+                    Understand India's
+                    <span class="gradient-text">Election Process</span>
+                    Like Never Before
+                </h1>
+
+                <p class="hero__subtitle reveal reveal--delay-2">
+                    Your AI-powered guide to India's democracy — from voter registration to result declaration.
+                    Ask questions, explore timelines, and test your knowledge.
+                </p>
+
+                <div class="hero__ctas reveal reveal--delay-3">
+                    <a href="#timeline" class="btn btn--primary btn--lg">Explore Timeline 📅</a>
+                    <a href="#chat" class="btn btn--outline btn--lg">Ask AI Assistant 🤖</a>
+                </div>
+
+                <div class="hero__stats reveal reveal--delay-4" aria-label="Key statistics">
+                    <div class="stat-card">
+                        <span class="stat-card__number" data-target="969">0</span><span
+                            class="stat-card__unit">M+</span>
+                        <span class="stat-card__label">Registered Voters</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card__number" data-target="543">0</span>
+                        <span class="stat-card__label">Lok Sabha Seats</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card__number" data-target="28">0</span>
+                        <span class="stat-card__label">States & UTs Covered</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card__number" data-target="7">0</span>
+                        <span class="stat-card__label">Election Phases (2024)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scroll indicator -->
+            <div class="hero__scroll" aria-hidden="true">
+                <div class="hero__scroll-dot"></div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════
+         INTERACTIVE TIMELINE
+    ══════════════════════════════════════ -->
+        <section class="timeline-section section" id="timeline" aria-label="Election timeline">
+            <div class="container">
+                <div class="section__header reveal">
+                    <span class="section__label">Step by Step</span>
+                    <h2 class="section__title">India's Election <span class="gradient-text">Timeline</span></h2>
+                    <p class="section__subtitle">
+                        From announcement to results — every phase explained clearly.
+                    </p>
+                </div>
+
+                <div class="timeline" role="list">
+
+                    <article class="timeline__item reveal" data-step="1" role="listitem">
+                        <div class="timeline__connector" aria-hidden="true"></div>
+                        <div class="timeline__dot" aria-hidden="true">
+                            <span>📢</span>
+                        </div>
+                        <div class="timeline__card">
+                            <span class="timeline__tag">Phase 1</span>
+                            <h3 class="timeline__title">Election Announcement</h3>
+                            <p class="timeline__desc">
+                                The Election Commission of India (ECI) issues the official election schedule, triggering
+                                the
+                                <strong>Model Code of Conduct (MCC)</strong>. Political parties must follow strict rules
+                                from this point.
+                            </p>
+                            <ul class="timeline__points">
+                                <li>ECI announces dates via press conference</li>
+                                <li>MCC comes into immediate effect</li>
+                                <li>Government expenditure and transfers are restricted</li>
+                            </ul>
+                            <button class="timeline__learn-btn"
+                                data-topic="Election Announcement and Model Code of Conduct in India"
+                                aria-label="Learn more about election announcement">
+                                Learn More →
+                            </button>
+                        </div>
+                    </article>
+
+                    <article class="timeline__item timeline__item--right reveal" data-step="2" role="listitem">
+                        <div class="timeline__connector" aria-hidden="true"></div>
+                        <div class="timeline__dot" aria-hidden="true">
+                            <span>📋</span>
+                        </div>
+                        <div class="timeline__card">
+                            <span class="timeline__tag">Phase 2</span>
+                            <h3 class="timeline__title">Voter Registration</h3>
+                            <p class="timeline__desc">
+                                Citizens above 18 years can register through the <strong>NVSP portal</strong> or Form 6.
+                                Your name must appear on the Electoral Roll to vote.
+                            </p>
+                            <ul class="timeline__points">
+                                <li>Visit nvsp.in or use Voter Helpline 1950</li>
+                                <li>Submit Form 6 for new registration</li>
+                                <li>Check name via CEO's website of your state</li>
+                            </ul>
+                            <button class="timeline__learn-btn"
+                                data-topic="Voter registration process in India, NVSP, Form 6"
+                                aria-label="Learn more about voter registration">
+                                Learn More →
+                            </button>
+                        </div>
+                    </article>
+
+                    <article class="timeline__item reveal" data-step="3" role="listitem">
+                        <div class="timeline__connector" aria-hidden="true"></div>
+                        <div class="timeline__dot" aria-hidden="true">
+                            <span>🙋</span>
+                        </div>
+                        <div class="timeline__card">
+                            <span class="timeline__tag">Phase 3</span>
+                            <h3 class="timeline__title">Candidate Nomination</h3>
+                            <p class="timeline__desc">
+                                Candidates file their nomination papers with the Returning Officer. Scrutiny follows,
+                                and candidates
+                                can withdraw within the stipulated deadline.
+                            </p>
+                            <ul class="timeline__points">
+                                <li>Nomination papers filed with supporting signatures</li>
+                                <li>Scrutiny by Returning Officer</li>
+                                <li>Last date for withdrawal of candidature</li>
+                            </ul>
+                            <button class="timeline__learn-btn"
+                                data-topic="Candidate nomination process in Indian elections"
+                                aria-label="Learn more about nomination">
+                                Learn More →
+                            </button>
+                        </div>
+                    </article>
+
+                    <article class="timeline__item timeline__item--right reveal" data-step="4" role="listitem">
+                        <div class="timeline__connector" aria-hidden="true"></div>
+                        <div class="timeline__dot" aria-hidden="true">
+                            <span>📣</span>
+                        </div>
+                        <div class="timeline__card">
+                            <span class="timeline__tag">Phase 4</span>
+                            <h3 class="timeline__title">Election Campaign</h3>
+                            <p class="timeline__desc">
+                                Political parties and candidates campaign across constituencies. Campaigning must stop
+                                <strong>48 hours</strong>
+                                before polling (the "campaign silence period").
+                            </p>
+                            <ul class="timeline__points">
+                                <li>Rallies, roadshows, door-to-door campaigns</li>
+                                <li>Expenditure limits enforced by ECI</li>
+                                <li>Campaign silence 48 hrs before voting</li>
+                            </ul>
+                            <button class="timeline__learn-btn"
+                                data-topic="Election campaign rules and Model Code of Conduct India"
+                                aria-label="Learn more about campaigns">
+                                Learn More →
+                            </button>
+                        </div>
+                    </article>
+
+                    <article class="timeline__item reveal" data-step="5" role="listitem">
+                        <div class="timeline__connector" aria-hidden="true"></div>
+                        <div class="timeline__dot" aria-hidden="true">
+                            <span>🗳️</span>
+                        </div>
+                        <div class="timeline__card">
+                            <span class="timeline__tag">Phase 5</span>
+                            <h3 class="timeline__title">Polling Day</h3>
+                            <p class="timeline__desc">
+                                Voters cast their votes using <strong>Electronic Voting Machines (EVM)</strong>. VVPAT
+                                slips confirm
+                                the vote. Polls generally run from 7 AM to 6 PM.
+                            </p>
+                            <ul class="timeline__points">
+                                <li>Carry valid Voter ID / Aadhaar / listed documents</li>
+                                <li>Press the EVM button for your candidate</li>
+                                <li>VVPAT slip appears for 7 seconds for verification</li>
+                            </ul>
+                            <button class="timeline__learn-btn"
+                                data-topic="How to vote in India, EVM and VVPAT explained"
+                                aria-label="Learn more about polling day">
+                                Learn More →
+                            </button>
+                        </div>
+                    </article>
+
+                    <article class="timeline__item timeline__item--right reveal" data-step="6" role="listitem">
+                        <div class="timeline__connector" aria-hidden="true"></div>
+                        <div class="timeline__dot" aria-hidden="true">
+                            <span>🔢</span>
+                        </div>
+                        <div class="timeline__card">
+                            <span class="timeline__tag">Phase 6</span>
+                            <h3 class="timeline__title">Vote Counting & Results</h3>
+                            <p class="timeline__desc">
+                                Votes are counted on a designated date under strict supervision. Results are declared
+                                constituency by
+                                constituency and the winning candidate is notified.
+                            </p>
+                            <ul class="timeline__points">
+                                <li>Counting starts at 8 AM on counting day</li>
+                                <li>Agents of candidates observe the process</li>
+                                <li>Candidate with most votes wins (First Past the Post)</li>
+                            </ul>
+                            <button class="timeline__learn-btn"
+                                data-topic="Vote counting and result declaration process in Indian elections"
+                                aria-label="Learn more about counting">
+                                Learn More →
+                            </button>
+                        </div>
+                    </article>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════
+         PROCESS CARDS (Key Concepts)
+    ══════════════════════════════════════ -->
+        <section class="process-section section" id="process" aria-label="Key election concepts">
+            <div class="container">
+                <div class="section__header reveal">
+                    <span class="section__label">Key Concepts</span>
+                    <h2 class="section__title">Everything You Need to <span class="gradient-text">Know</span></h2>
+                    <p class="section__subtitle">Click any card to get a detailed AI explanation.</p>
+                </div>
+
+                <div class="process-grid">
+
+                    <button class="process-card reveal"
+                        data-topic="What is the Election Commission of India and its role?"
+                        aria-label="Learn about Election Commission of India">
+                        <div class="process-card__icon">⚖️</div>
+                        <h3 class="process-card__title">Election Commission of India</h3>
+                        <p class="process-card__desc">The constitutional body that oversees all elections in India with
+                            full autonomy.</p>
+                        <span class="process-card__cta">Explore →</span>
+                    </button>
+
+                    <button class="process-card reveal"
+                        data-topic="What are Electronic Voting Machines EVM and VVPAT in India?"
+                        aria-label="Learn about EVM and VVPAT">
+                        <div class="process-card__icon">🖥️</div>
+                        <h3 class="process-card__title">EVM & VVPAT</h3>
+                        <p class="process-card__desc">How India's tamper-proof electronic voting machines and paper
+                            trails work.</p>
+                        <span class="process-card__cta">Explore →</span>
+                    </button>
+
+                    <button class="process-card reveal"
+                        data-topic="What is the Model Code of Conduct in Indian elections?"
+                        aria-label="Learn about Model Code of Conduct">
+                        <div class="process-card__icon">📜</div>
+                        <h3 class="process-card__title">Model Code of Conduct</h3>
+                        <p class="process-card__desc">Rules that govern political parties and candidates during election
+                            period.</p>
+                        <span class="process-card__cta">Explore →</span>
+                    </button>
+
+                    <button class="process-card reveal"
+                        data-topic="Difference between Lok Sabha and Rajya Sabha elections in India"
+                        aria-label="Learn about Lok Sabha vs Rajya Sabha">
+                        <div class="process-card__icon">🏛️</div>
+                        <h3 class="process-card__title">Lok Sabha vs Rajya Sabha</h3>
+                        <p class="process-card__desc">Understanding India's bicameral parliament and how each house is
+                            elected.</p>
+                        <span class="process-card__cta">Explore →</span>
+                    </button>
+
+                    <button class="process-card reveal"
+                        data-topic="How does voter registration work in India, NVSP Form 6"
+                        aria-label="Learn about voter registration">
+                        <div class="process-card__icon">📝</div>
+                        <h3 class="process-card__title">Voter Registration</h3>
+                        <p class="process-card__desc">Step-by-step guide to registering as a voter and checking your
+                            name on the list.</p>
+                        <span class="process-card__cta">Explore →</span>
+                    </button>
+
+                    <button class="process-card reveal"
+                        data-topic="What is First Past the Post electoral system in India?"
+                        aria-label="Learn about FPTP system">
+                        <div class="process-card__icon">🏆</div>
+                        <h3 class="process-card__title">First Past the Post</h3>
+                        <p class="process-card__desc">India's voting system where the candidate with the most votes wins
+                            the seat.</p>
+                        <span class="process-card__cta">Explore →</span>
+                    </button>
+
+                    <button class="process-card reveal"
+                        data-topic="What documents are accepted as identity proof on election day in India?"
+                        aria-label="Learn about voter ID documents">
+                        <div class="process-card__icon">🪪</div>
+                        <h3 class="process-card__title">Voter ID & Documents</h3>
+                        <p class="process-card__desc">Which documents you can carry to the polling booth to cast your
+                            vote.</p>
+                        <span class="process-card__cta">Explore →</span>
+                    </button>
+
+                    <button class="process-card reveal"
+                        data-topic="What is NOTA (None of the Above) in Indian elections?"
+                        aria-label="Learn about NOTA">
+                        <div class="process-card__icon">🚫</div>
+                        <h3 class="process-card__title">NOTA — Right to Reject</h3>
+                        <p class="process-card__desc">The "None of the Above" option on EVMs — what it means and how to
+                            use it.</p>
+                        <span class="process-card__cta">Explore →</span>
+                    </button>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════
+         QUIZ SECTION
+    ══════════════════════════════════════ -->
+        <section class="quiz-section section" id="quiz" aria-label="Election knowledge quiz">
+            <div class="container">
+                <div class="section__header reveal">
+                    <span class="section__label">Test Yourself</span>
+                    <h2 class="section__title">Election <span class="gradient-text">Knowledge Quiz</span></h2>
+                    <p class="section__subtitle">AI-generated questions. How much do you know?</p>
+                </div>
+
+                <div class="quiz-wrapper reveal">
+                    <!-- Difficulty selector -->
+                    <div class="quiz__difficulty" role="group" aria-label="Select quiz difficulty">
+                        <button class="difficulty-btn" data-level="easy" aria-pressed="false">🟢 Easy</button>
+                        <button class="difficulty-btn active" data-level="medium" aria-pressed="true">🟡 Medium</button>
+                        <button class="difficulty-btn" data-level="hard" aria-pressed="false">🔴 Hard</button>
+                    </div>
+
+                    <!-- Score display -->
+                    <div class="quiz__score" aria-live="polite" aria-label="Current score">
+                        Score: <span id="quizScore">0</span> / <span id="quizTotal">0</span>
+                    </div>
+
+                    <!-- Quiz card -->
+                    <div class="quiz__card" id="quizCard" aria-live="assertive">
+                        <div class="quiz__placeholder" id="quizPlaceholder">
+                            <div class="quiz__placeholder-icon">🧠</div>
+                            <p>Press <strong>"New Question"</strong> to start the quiz!</p>
+                            <p class="quiz__placeholder-sub">Questions are generated by AI in real time.</p>
+                        </div>
+
+                        <div class="quiz__question-wrap" id="quizQuestionWrap" hidden>
+                            <p class="quiz__question-text" id="quizQuestion"></p>
+                            <div class="quiz__options" id="quizOptions" role="list"></div>
+                        </div>
+
+                        <div class="quiz__result" id="quizResult" hidden aria-live="polite">
+                            <div class="quiz__result-icon" id="quizResultIcon"></div>
+                            <p class="quiz__result-text" id="quizResultText"></p>
+                            <p class="quiz__explanation" id="quizExplanation"></p>
+                        </div>
+                    </div>
+
+                    <div class="quiz__actions">
+                        <button class="btn btn--primary" id="newQuestionBtn" aria-label="Generate new quiz question">
+                            <span id="newQuestionBtnText">🎯 New Question</span>
+                            <span class="spinner" id="quizSpinner" hidden aria-label="Loading question..."></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════
+         AI CHAT SECTION
+    ══════════════════════════════════════ -->
+        <section class="chat-section section" id="chat" aria-label="AI chat assistant">
+            <div class="container">
+                <div class="section__header reveal">
+                    <span class="section__label">AI Powered</span>
+                    <h2 class="section__title">Ask <span class="gradient-text">VoteSmart AI</span></h2>
+                    <p class="section__subtitle">
+                        Ask anything about India's elections. Powered by Vertex AI (Gemini 1.5 Flash).
+                    </p>
+                </div>
+
+                <div class="chat-wrapper reveal">
+                    <!-- Chat message window -->
+                    <div class="chat__window" id="chatWindow" role="log" aria-label="Chat conversation"
+                        aria-live="polite">
+                        <!-- Welcome message -->
+                        <div class="chat__message chat__message--bot" id="welcomeMsg">
+                            <div class="chat__avatar" aria-hidden="true">🤖</div>
+                            <div class="chat__bubble">
+                                <p>Namaste! 🙏 I'm <strong>VoteSmart AI</strong>, your guide to India's election
+                                    process.</p>
+                                <p>Ask me anything — voter registration, EVMs, polling day, election phases, or the role
+                                    of the ECI!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Suggested questions -->
+                    <div class="chat__suggestions" id="chatSuggestions" aria-label="Suggested questions">
+                        <p class="chat__suggestions-label">Try asking:</p>
+                        <div class="chat__suggestion-chips">
+                            <button class="chip" data-msg="How do I register as a voter in India?"
+                                aria-label="Ask about voter registration">How do I register as a voter?</button>
+                            <button class="chip" data-msg="What is an EVM and how does it work?"
+                                aria-label="Ask about EVM">What is an EVM?</button>
+                            <button class="chip" data-msg="What documents do I need to vote?"
+                                aria-label="Ask about voting documents">Documents needed to vote?</button>
+                            <button class="chip" data-msg="What is NOTA in Indian elections?"
+                                aria-label="Ask about NOTA">What is NOTA?</button>
+                            <button class="chip" data-msg="How many phases does a Lok Sabha election have?"
+                                aria-label="Ask about election phases">How many election phases?</button>
+                        </div>
+                    </div>
+
+                    <!-- Input area -->
+                    <div class="chat__input-area">
+                        <div class="chat__input-wrap">
+                            <textarea class="chat__input" id="chatInput" placeholder="Ask about India's elections..."
+                                rows="1" maxlength="500" aria-label="Type your question" autocomplete="off"
+                                spellcheck="true"></textarea>
+                            <div class="chat__input-meta">
+                                <span class="chat__char-count" id="charCount">0/500</span>
+                            </div>
+                        </div>
+                        <button class="chat__send-btn" id="chatSendBtn" aria-label="Send message" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <p class="chat__disclaimer">
+                        ⚠️ AI responses are for educational purposes only. Always verify important information at
+                        <a href="https://eci.gov.in" target="_blank" rel="noopener noreferrer">eci.gov.in</a>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════
+         IMPORTANT LINKS / RESOURCES
+    ══════════════════════════════════════ -->
+        <section class="resources-section section" id="resources" aria-label="Important electoral resources">
+            <div class="container">
+                <div class="section__header reveal">
+                    <span class="section__label">Official Links</span>
+                    <h2 class="section__title">Important <span class="gradient-text">Resources</span></h2>
+                </div>
+
+                <div class="resources-grid">
+                    <a href="https://eci.gov.in" target="_blank" rel="noopener noreferrer" class="resource-card reveal"
+                        aria-label="Visit Election Commission of India website">
+                        <div class="resource-card__icon">⚖️</div>
+                        <h3>Election Commission of India</h3>
+                        <p>Official ECI portal with all election information.</p>
+                        <span class="resource-card__link">eci.gov.in →</span>
+                    </a>
+                    <a href="https://nvsp.in" target="_blank" rel="noopener noreferrer" class="resource-card reveal"
+                        aria-label="Visit National Voter Service Portal">
+                        <div class="resource-card__icon">📝</div>
+                        <h3>NVSP — Voter Portal</h3>
+                        <p>Register as a voter, download e-EPIC, check your name.</p>
+                        <span class="resource-card__link">nvsp.in →</span>
+                    </a>
+                    <a href="https://voters.eci.gov.in" target="_blank" rel="noopener noreferrer"
+                        class="resource-card reveal" aria-label="Visit Voter Portal">
+                        <div class="resource-card__icon">🗳️</div>
+                        <h3>Voters Portal</h3>
+                        <p>One-stop portal for all voter services by ECI.</p>
+                        <span class="resource-card__link">voters.eci.gov.in →</span>
+                    </a>
+                    <a href="tel:1950" class="resource-card reveal" aria-label="Call Voter Helpline 1950">
+                        <div class="resource-card__icon">📞</div>
+                        <h3>Voter Helpline</h3>
+                        <p>Call <strong>1950</strong> for any voter service query across India.</p>
+                        <span class="resource-card__link">Dial 1950 →</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ══════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════ -->
+    <footer class="footer" role="contentinfo">
+        <div class="container footer__inner">
+            <div class="footer__brand">
+                <span>🗳️</span>
+                <strong>VoteSmart India</strong>
+            </div>
+            <p class="footer__copy">
+                © {{ year }} VoteSmart India. Built for educational purposes only.
+                Information sourced from <a href="https://eci.gov.in" target="_blank" rel="noopener noreferrer">ECI</a>.
+            </p>
+            <p class="footer__tech">
+                Powered by <strong>Vertex AI (Gemini)</strong> &amp; <strong>Google Cloud Run</strong>
+            </p>
+        </div>
+    </footer>
+
+    <!-- AI Explanation Modal -->
+    <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+        <div class="modal">
+            <div class="modal__header">
+                <h3 class="modal__title" id="modalTitle">Loading...</h3>
+                <button class="modal__close" id="modalClose" aria-label="Close modal">✕</button>
+            </div>
+            <div class="modal__body" id="modalBody">
+                <div class="modal__loading" id="modalLoading" aria-live="polite">
+                    <div class="spinner spinner--blue"></div>
+                    <p>Generating explanation with AI...</p>
+                </div>
+                <div class="modal__content" id="modalContent" hidden></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main JS -->
+    <script src="../static/js/main.js" defer></script>
+</body>
+
+</html>

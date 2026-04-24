@@ -17,14 +17,26 @@
         rel="stylesheet" />
 
     <!-- Main Stylesheet -->
-    <link rel="stylesheet" href="../static/css/style.css" />
+    <link rel="stylesheet" href="/static/css/style.css" />
 
     <!-- Favicon (inline SVG data URI) -->
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>" />
+        
+    <!-- Google Translate -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement(
+                { pageLanguage: 'en', includedLanguages: 'hi,en,ta,te,bn,mr,gu,kn,ml,pa', layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
+                'google_translate_element'
+            );
+        }
+    </script>
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" defer></script>
 </head>
 
 <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
 
     <!-- ══════════════════════════════════════
        HEADER / NAVBAR
@@ -32,8 +44,8 @@
     <header class="header" id="header">
         <nav class="nav container">
             <a href="#" class="nav__logo" aria-label="VoteIndiaSmart Home">
-                <span class="nav__logo-icon">🗳️</span>
-                <span class="nav__logo-text">VoteIndia<strong style="color: var(--blue-600)">Smart</strong></span>
+                <span class="nav__logo-icon" aria-hidden="true">🗳️</span>
+                <span class="nav__logo-text">VoteIndia<strong class="nav__logo-highlight">Smart</strong></span>
             </a>
 
             <ul class="nav__links" role="list">
@@ -45,6 +57,7 @@
             </ul>
 
             <a href="#chat" class="btn btn--primary nav__cta">Ask AI 🤖</a>
+            <div id="google_translate_element" style="margin-left: 8px;"></div>
 
             <!-- Mobile hamburger -->
             <button class="nav__hamburger" id="navHamburger" aria-label="Toggle menu" aria-expanded="false">
@@ -64,7 +77,7 @@
         </div>
     </header>
 
-    <main>
+    <main id="main">
 
         <!-- ══════════════════════════════════════
          HERO SECTION
@@ -604,7 +617,7 @@
     </div>
 
     <!-- Main JS -->
-    <script src="../static/js/main.js" defer></script>
+    <script src="/static/js/main.js" defer></script>
 </body>
 
 </html>

@@ -1726,3 +1726,27 @@ ul {
         font-size: 1.1rem;
     }
 }
+/* ─────────────────────────────────────────────
+   ACCESSIBILITY & UTILITIES
+───────────────────────────────────────────── */
+.skip-link {
+    position: absolute;
+    top: -50px;
+    left: 10px;
+    background: var(--blue-600);
+    color: var(--white);
+    padding: 10px 16px;
+    z-index: 9999;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    text-decoration: none;
+    transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+    top: 10px;
+}
+
+.nav__logo-highlight {
+    color: var(--blue-600);
+}

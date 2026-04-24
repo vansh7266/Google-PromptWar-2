@@ -210,12 +210,12 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
     CSP = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' "
+        "script-src 'self' "
         "https://fonts.googleapis.com "
         "https://translate.google.com "
         "https://translate.googleapis.com "
         "https://www.gstatic.com; "
-        "style-src 'self' 'unsafe-inline' "
+        "style-src 'self' "
         "https://fonts.googleapis.com "
         "https://www.gstatic.com; "
         "font-src 'self' https://fonts.gstatic.com; "

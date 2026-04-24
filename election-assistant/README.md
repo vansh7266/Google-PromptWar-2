@@ -16,7 +16,7 @@ all through an interactive AI-powered assistant.
 ## 🧠 Approach & Logic
 
 The solution uses a **FastAPI backend** served on **Google Cloud Run**, powered by
-**Vertex AI (Gemini 1.5 Flash)** to answer natural language questions about Indian elections.
+**Vertex AI (Gemini 2.5 Flash Lite)** to answer natural language questions about Indian elections.
 
 ### Key Design Decisions
 
@@ -49,7 +49,7 @@ FastAPI App (Cloud Run — uvicorn ASGI)
 
 | Feature | Description |
 |---|---|
-| 🤖 AI Chat | Ask any election question; answered by Gemini 1.5 Flash |
+| 🤖 AI Chat | Ask any election question; answered by Gemini 2.5 Flash Lite |
 | 📅 Interactive Timeline | 6-phase visual journey from announcement to results |
 | 🧩 Process Cards | 8 key concepts — click to get an AI explanation |
 | 🎯 Knowledge Quiz | AI-generated MCQ, 3 difficulty levels |
@@ -80,9 +80,10 @@ FastAPI App (Cloud Run — uvicorn ASGI)
 
 | Service | Usage |
 |---|---|
-| **Vertex AI (Gemini 1.5 Flash)** | Chat responses + Quiz generation |
+| **Vertex AI (Gemini 2.5 Flash Lite)** | Chat responses + Quiz generation |
 | **Google Cloud Run** | Serverless deployment (auto-scales) |
 | **Google Fonts** | Plus Jakarta Sans + Playfair Display |
+| **Google Translate Widget** | Multilingual support (10 Indian languages) |
 
 ---
 
@@ -140,7 +141,7 @@ gcloud run deploy election-assistant \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated \
-  --set-env-vars GCP_PROJECT_ID=$PROJECT_ID,GCP_LOCATION=us-central1,GEMINI_MODEL=gemini-1.5-flash \
+  --set-env-vars GCP_PROJECT_ID=$PROJECT_ID,GCP_LOCATION=us-central1,GEMINI_MODEL=gemini-2.5-flash-lite \
   --memory 512Mi \
   --cpu 1 \
   --min-instances 0 \
@@ -154,7 +155,7 @@ gcloud run deploy election-assistant \
 1. The target audience is Indian citizens, primarily first-time voters.
 2. Information is based on publicly available ECI data (2024 General Elections).
 3. The application is educational only — it does not store any user data.
-4. Vertex AI (Gemini 1.5 Flash) is available in the `us-central1` region.
+4. Vertex AI (Gemini 2.5 Flash Lite) is available in the `us-central1` region.
 
 ---
 
@@ -169,6 +170,8 @@ election-assistant/
 ├── .gitignore
 ├── .env.example            # Environment variable template (no secrets)
 ├── README.md
+├── tests/
+│   └── test_app.py         # Comprehensive pytest test suite
 ├── static/
 │   ├── css/style.css       # Light blue theme stylesheet
 │   └── js/main.js          # Chat, quiz, animations, interactivity

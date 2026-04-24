@@ -1,9 +1,9 @@
 /**
- * VoteSmart India — Main JavaScript
+ * VoteIndiaSmart — Main JavaScript
  * Handles: chat, quiz, animations, timeline learn-more,
  *           process cards, counter animation, navbar.
  *
- * All fetch calls target the Flask backend API.
+ * All fetch calls target the FastAPI backend API.
  * Input is sanitised before sending to the server.
  */
 

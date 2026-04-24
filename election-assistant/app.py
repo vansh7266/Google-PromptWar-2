@@ -211,16 +211,16 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     CSP = (
         "default-src 'self'; "
         "script-src 'self' "
-        "https://fonts.googleapis.com "
         "https://translate.google.com "
         "https://translate.googleapis.com "
         "https://www.gstatic.com; "
-        "style-src 'self' "
+        "style-src 'self' 'unsafe-inline' "
         "https://fonts.googleapis.com "
+        "https://translate.googleapis.com "
         "https://www.gstatic.com; "
         "font-src 'self' https://fonts.gstatic.com; "
-        "img-src 'self' data: https://www.gstatic.com https://flagcdn.com; "
-        "connect-src 'self'; "
+        "img-src 'self' data: https://www.gstatic.com https://www.google.com https://translate.google.com; "
+        "connect-src 'self' https://translate.googleapis.com; "
         "frame-src https://translate.google.com;"
     )
 
@@ -249,7 +249,6 @@ app = FastAPI(
     redoc_url="/redoc",  # ReDoc UI
 )
 
-# ── Static files & Jinja2 templates (MUST be before middleware) ──
 # ── Static files & Jinja2 templates (MUST be before middleware) ──
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")

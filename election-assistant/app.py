@@ -3,24 +3,20 @@ Election Process Education Assistant
 --------------------------------------
 FastAPI backend powered by Vertex AI (Gemini 1.5 Flash).
 Helps users understand India's election process interactively.
-
-Key advantages over Flask:
-  - Fully async endpoints (no blocking I/O)
-  - Pydantic request/response validation (auto 422 errors)
-  - Auto-generated OpenAPI docs at /docs and /redoc
-  - Built-in type safety throughout
-
-Author  : Election Assistant Team
-Version : 2.0.0
 """
 
+# --- Standard library ---
+import asyncio
 import json
 import logging
 import os
 import re
+from contextlib import asynccontextmanager
 from datetime import datetime
+from functools import partial
 from typing import Literal
 
+# --- Third-party ---
 import vertexai
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -39,40 +35,37 @@ from vertexai.generative_models import (
     SafetySetting,
 )
 
-# ─────────────────────────────────────────────
-# Logging
-# ─────────────────────────────────────────────
+# Google Services used:
+#   - Vertex AI (Gemini 1.5 Flash): AI chat and quiz generation
+#   - Cloud Run: serverless deployment
+#   - Cloud Build: container image CI/CD
+#   - GCR: container registry
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 logger = logging.getLogger(__name__)
 
-# ─────────────────────────────────────────────
-# Environment Variables
-# ─────────────────────────────────────────────
+# Environment
 GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "")
-GCP_LOCATION   = os.environ.get("GCP_LOCATION", "us-central1")
-GEMINI_MODEL   = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash-lite")
+GCP_LOCATION = os.environ.get("GCP_LOCATION", "us-central1")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
 
 if not GCP_PROJECT_ID:
     logger.warning("GCP_PROJECT_ID is not set. Vertex AI calls will fail.")
 
-# ─────────────────────────────────────────────
-# Vertex AI Initialisation
-# ─────────────────────────────────────────────
+# Vertex AI initialisation
 gemini_model: GenerativeModel | None = None
 
 try:
     vertexai.init(project=GCP_PROJECT_ID, location=GCP_LOCATION)
     gemini_model = GenerativeModel(GEMINI_MODEL)
-    logger.info("Vertex AI initialised successfully — model: %s", GEMINI_MODEL)
+    logger.info("Vertex AI initialised — model: %s", GEMINI_MODEL)
 except Exception as exc:
     logger.error("Failed to initialise Vertex AI: %s", exc)
 
-# ─────────────────────────────────────────────
-# Vertex AI Safety Settings
-# ─────────────────────────────────────────────
+# Safety settings
 SAFETY_SETTINGS = [
     SafetySetting(
         category=HarmCategory.HARM_CATEGORY_HATE_SPEECH,
@@ -92,9 +85,7 @@ SAFETY_SETTINGS = [
     ),
 ]
 
-# ─────────────────────────────────────────────
-# System Prompt — Election Education Context
-# ─────────────────────────────────────────────
+# System prompt
 SYSTEM_PROMPT = """
 You are VoteSmart India, an expert AI assistant dedicated to educating Indian citizens
 about the Indian election process in a clear, engaging, and non-partisan way.
@@ -124,22 +115,18 @@ Guidelines:
 7. Use emojis sparingly to make responses friendlier (🗳️ ✅ 📋).
 """
 
-# ─────────────────────────────────────────────
-# Input Sanitisation Helper
-# ─────────────────────────────────────────────
+
 def sanitize_input(text: str) -> str:
-    """
-    Strip HTML/script tags, null bytes, and collapse excessive whitespace.
-    Hard-limits to 500 characters.
-    """
-    text = re.sub(r"<[^>]*?>", "", text)   # remove HTML tags
-    text = text.replace("\x00", "")         # remove null bytes
-    text = re.sub(r"\s{3,}", "  ", text)    # collapse whitespace
+    """Strip HTML tags, null bytes, prompt-injection chars, and collapse whitespace."""
+    text = re.sub(r"<[^>]*?>", "", text)
+    text = text.replace("\x00", "")
+    text = re.sub(r"[\x01-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+    text = re.sub(r"^[^\w\s]+|[^\w\s]+$", "", text)
+    text = re.sub(r"\s{3,}", "  ", text)
     return text[:500].strip()
 
-# ─────────────────────────────────────────────
-# Pydantic Models — Request / Response
-# ─────────────────────────────────────────────
+
+# Pydantic models
 
 class ConversationTurn(BaseModel):
     """A single turn in the conversation history."""
@@ -156,12 +143,13 @@ class ChatRequest(BaseModel):
     )
     history: list[ConversationTurn] = Field(
         default_factory=list,
-        description="Previous conversation turns for context (max 20 turns).",
+        description="Previous conversation turns for context.",
     )
 
     @field_validator("message")
     @classmethod
     def sanitize_message(cls, v: str) -> str:
+        """Sanitise user message input."""
         cleaned = sanitize_input(v)
         if not cleaned:
             raise ValueError("Message must not be empty after sanitisation.")
@@ -194,17 +182,15 @@ class ErrorResponse(BaseModel):
     status: str = "error"
 
 
-# ─────────────────────────────────────────────
-# Rate Limiter  (slowapi — FastAPI-compatible)
-# ─────────────────────────────────────────────
+# Rate limiter
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["200/day", "50/hour"],
+    storage_uri="memory://",
 )
 
-# ─────────────────────────────────────────────
-# Security Headers Middleware
-# ─────────────────────────────────────────────
+
+# Security headers middleware
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Injects security headers into every HTTP response."""
 
@@ -213,31 +199,43 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "script-src 'self' "
         "https://translate.google.com "
         "https://translate.googleapis.com "
-        "https://www.gstatic.com; "
-        "style-src 'self' 'unsafe-inline' "
+        "https://www.gstatic.com "
+        "https://fonts.googleapis.com; "
+        "style-src 'self' "
         "https://fonts.googleapis.com "
-        "https://translate.googleapis.com "
         "https://www.gstatic.com; "
         "font-src 'self' https://fonts.gstatic.com; "
-        "img-src 'self' data: https://www.gstatic.com https://www.google.com https://translate.google.com; "
-        "connect-src 'self' https://translate.googleapis.com; "
+        "img-src 'self' data: https://www.gstatic.com "
+        "https://flagcdn.com https://www.google.com; "
+        "connect-src 'self'; "
         "frame-src https://translate.google.com;"
     )
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next) -> JSONResponse:
+        """Add security headers to every response."""
         response = await call_next(request)
-        response.headers["X-Content-Type-Options"]  = "nosniff"
-        response.headers["X-Frame-Options"]          = "DENY"
-        response.headers["X-XSS-Protection"]         = "1; mode=block"
-        response.headers["Referrer-Policy"]           = "strict-origin-when-cross-origin"
-        response.headers["Permissions-Policy"]        = "geolocation=(), microphone=(), camera=()"
-        response.headers["Content-Security-Policy"]   = self.CSP
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        response.headers["Content-Security-Policy"] = self.CSP
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        if request.url.path.startswith("/api/"):
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
         return response
 
 
-# ─────────────────────────────────────────────
-# FastAPI Application
-# ─────────────────────────────────────────────
+# Lifespan
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application startup and shutdown lifecycle."""
+    logger.info("VoteIndiaSmart starting up...")
+    yield
+    logger.info("VoteIndiaSmart shutting down...")
+
+
+# FastAPI application
 app = FastAPI(
     title="VoteSmart India — Election Education Assistant",
     description=(
@@ -245,15 +243,16 @@ app = FastAPI(
         "Built on Vertex AI (Gemini 1.5 Flash) and deployed on Google Cloud Run."
     ),
     version="2.0.0",
-    docs_url="/docs",    # Swagger UI
-    redoc_url="/redoc",  # ReDoc UI
+    docs_url="/docs",
+    redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
-# ── Static files & Jinja2 templates (MUST be before middleware) ──
+# Static files & templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# ── Middleware (registered outermost last) ──
+# Middleware
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
@@ -262,13 +261,12 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 
-# ── Rate-limit error handler ──
+# Rate-limit error handler
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# ─────────────────────────────────────────────
+
 # Routes
-# ─────────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def index(request: Request) -> HTMLResponse:
@@ -285,13 +283,16 @@ async def index(request: Request) -> HTMLResponse:
     description="Used by Cloud Run to confirm the service is alive.",
     tags=["System"],
 )
-async def health_check() -> dict:
+async def health_check() -> JSONResponse:
     """Health check endpoint for Cloud Run."""
-    return {
-        "status": "ok",
-        "service": "election-assistant",
-        "version": "2.0.0",
-    }
+    return JSONResponse(
+        content={
+            "status": "ok",
+            "service": "election-assistant",
+            "version": "2.0.0",
+        },
+        headers={"Cache-Control": "public, max-age=30"},
+    )
 
 
 @app.post(
@@ -308,20 +309,22 @@ async def health_check() -> dict:
 )
 @limiter.limit("30/minute")
 async def chat(request: Request, body: ChatRequest) -> ChatResponse:
-    """
-    Accepts a user message + optional conversation history.
-    Returns a Gemini-generated answer scoped to Indian elections.
-    """
+    """Accept a user message and return a Gemini-generated election answer."""
+    content_type = request.headers.get("content-type", "")
+    if "application/json" not in content_type:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Content-Type must be application/json.",
+        )
+
     if gemini_model is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="AI service is currently unavailable.",
         )
 
-    # Build the conversation prompt
     conversation_parts: list[str] = []
-
-    for turn in body.history[-10:]:          # use last 10 turns only
+    for turn in body.history[-6:]:
         cleaned = sanitize_input(turn.content)
         if turn.role == "user":
             conversation_parts.append(f"User: {cleaned}")
@@ -332,14 +335,19 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
     full_prompt = "\n".join(conversation_parts)
 
     try:
-        response = gemini_model.generate_content(
-            [SYSTEM_PROMPT, full_prompt],
-            safety_settings=SAFETY_SETTINGS,
-            generation_config={
-                "temperature": 0.4,
-                "top_p": 0.95,
-                "max_output_tokens": 512,
-            },
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            partial(
+                gemini_model.generate_content,
+                [SYSTEM_PROMPT, full_prompt],
+                safety_settings=SAFETY_SETTINGS,
+                generation_config={
+                    "temperature": 0.4,
+                    "top_p": 0.95,
+                    "max_output_tokens": 512,
+                },
+            ),
         )
 
         reply_text = response.text.replace("*", "").strip()
@@ -368,10 +376,14 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
 )
 @limiter.limit("10/minute")
 async def generate_quiz(request: Request, body: QuizRequest) -> QuizResponse:
-    """
-    Generates a multiple-choice question at the requested difficulty level.
-    The AI response is validated by Pydantic's QuizResponse model automatically.
-    """
+    """Generate an AI-powered multiple-choice quiz question."""
+    content_type = request.headers.get("content-type", "")
+    if "application/json" not in content_type:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Content-Type must be application/json.",
+        )
+
     if gemini_model is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -398,25 +410,26 @@ Rules:
 """
 
     try:
-        response = gemini_model.generate_content(
-            quiz_prompt,
-            safety_settings=SAFETY_SETTINGS,
-            generation_config={
-                "temperature": 0.7,
-                "top_p": 0.9,
-                "max_output_tokens": 300,
-            },
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            partial(
+                gemini_model.generate_content,
+                quiz_prompt,
+                safety_settings=SAFETY_SETTINGS,
+                generation_config={
+                    "temperature": 0.7,
+                    "top_p": 0.9,
+                    "max_output_tokens": 256,
+                },
+            ),
         )
 
         raw_text = response.text.strip()
-
-        # Strip markdown fences if the model accidentally wraps the response
         raw_text = re.sub(r"^```(?:json)?\s*", "", raw_text)
-        raw_text = re.sub(r"\s*```$",           "", raw_text)
+        raw_text = re.sub(r"\s*```$", "", raw_text)
 
         quiz_data = json.loads(raw_text)
-
-        # Pydantic validates structure and raises 422 if malformed
         return QuizResponse(**quiz_data)
 
     except json.JSONDecodeError as exc:
@@ -433,12 +446,11 @@ Rules:
         )
 
 
-# ─────────────────────────────────────────────
-# Global Exception Handlers
-# ─────────────────────────────────────────────
+# Exception handlers
 
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc) -> JSONResponse:
+    """Return JSON for 404 errors."""
     return JSONResponse(
         status_code=404,
         content={"error": "Resource not found.", "status": "error"},
@@ -447,6 +459,7 @@ async def not_found_handler(request: Request, exc) -> JSONResponse:
 
 @app.exception_handler(500)
 async def internal_error_handler(request: Request, exc) -> JSONResponse:
+    """Return JSON for 500 errors."""
     logger.error("Unhandled server error: %s", exc)
     return JSONResponse(
         status_code=500,
@@ -454,13 +467,11 @@ async def internal_error_handler(request: Request, exc) -> JSONResponse:
     )
 
 
-# ─────────────────────────────────────────────
-# Entry Point  (local dev only — Cloud Run uses Dockerfile CMD)
-# ─────────────────────────────────────────────
+# Entry point (local dev only)
 if __name__ == "__main__":
     import uvicorn
 
-    port  = int(os.environ.get("PORT", 8080))
+    port = int(os.environ.get("PORT", 8080))
     debug = os.environ.get("DEBUG", "false").lower() == "true"
 
     uvicorn.run(

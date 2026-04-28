@@ -27,6 +27,7 @@ The solution uses a **FastAPI backend** served on **Google Cloud Run**, powered 
 - **Progressive disclosure**: Content flows from a high-level overview (hero stats, timeline)
   to deep-dive (AI chat, process cards) so users of any level are well served.
 - **Type-safe API**: Pydantic models validate every request and response automatically.
+- **Async AI calls**: Vertex AI SDK calls run in a thread executor for non-blocking performance.
 
 ---
 
@@ -56,23 +57,43 @@ FastAPI App (Cloud Run — uvicorn ASGI)
 | 📊 Live Stats | Animated voter statistics (969M+ voters, 543 seats, etc.) |
 | 🔗 Official Resources | Direct links to ECI, NVSP, Voter Portal, Helpline 1950 |
 | 📄 API Docs | Auto-generated Swagger UI at `/docs` |
+| 🗳️ Floating Chat FAB | Quick access floating button to AI assistant |
+| 🌐 Google Translate | Multi-language support for 10 Indian languages |
 
 ---
 
 ## 🔐 Security Implementation
 
 - **No API keys in code** — credentials via ADC (Application Default Credentials) on Cloud Run
-- **Input sanitisation** — HTML/script tags stripped, length capped at 500 chars
+- **Input sanitisation** — HTML/script tags stripped, prompt-injection chars removed, length capped at 500 chars
 - **Pydantic validation** — every request field validated before hitting AI; auto 422 on bad input
 - **Rate limiting** — slowapi: 30 req/min on `/api/chat`, 10 req/min on `/api/quiz`
+- **Content-Type validation** — explicit JSON content-type check on API endpoints
 - **Security headers** on every response via custom Starlette middleware:
   - `X-Content-Type-Options: nosniff`
   - `X-Frame-Options: DENY`
   - `X-XSS-Protection: 1; mode=block`
-  - `Content-Security-Policy` (strict)
+  - `Content-Security-Policy` (strict, no unsafe-inline)
+  - `Strict-Transport-Security` (HSTS)
   - `Permissions-Policy`
+  - `Referrer-Policy`
+  - `Cache-Control` (no-store on API routes)
 - **Non-root Docker user** — app runs as `appuser`, never as root
 - **Vertex AI Safety Settings** — `BLOCK_MEDIUM_AND_ABOVE` on all four harm categories
+
+---
+
+## ♿ Accessibility
+
+- Skip-to-content link
+- ARIA labels on all interactive elements
+- Focus-visible outlines for keyboard navigation
+- `prefers-reduced-motion` media query support
+- Focus trap in modal dialogs
+- `role="radio"` and `aria-checked` on quiz options
+- `aria-describedby` on chat input
+- `aria-label` on timeline phases
+- Semantic HTML5 structure with `<main>`, `<nav>`, `<article>`
 
 ---
 
@@ -80,9 +101,31 @@ FastAPI App (Cloud Run — uvicorn ASGI)
 
 | Service | Usage |
 |---|---|
-| **Vertex AI (Gemini 1.5 Flash)** | Chat responses + Quiz generation |
-| **Google Cloud Run** | Serverless deployment (auto-scales) |
-| **Google Fonts** | Plus Jakarta Sans + Playfair Display |
+| **Vertex AI (Gemini 1.5 Flash)** | AI Chat + Quiz generation |
+| **Google Cloud Run** | Serverless auto-scaling deployment |
+| **Google Cloud Build** | Container image building + CI |
+| **Google Fonts** | Plus Jakarta Sans + Playfair Display typography |
+| **Google Translate Widget** | 10 Indian languages support |
+| **Google Container Registry** | Docker image storage (gcr.io) |
+
+---
+
+## 🧪 Testing
+
+Run tests locally:
+
+```bash
+cd election-assistant
+pytest tests/ -v
+```
+
+The test suite includes 35+ tests covering:
+- Health check & routing
+- Security headers (HSTS, CSP, X-Frame-Options, etc.)
+- Chat API validation & mocked success
+- Quiz API validation & mocked success
+- Input sanitisation unit tests
+- Static file serving
 
 ---
 
@@ -172,8 +215,11 @@ election-assistant/
 ├── static/
 │   ├── css/style.css       # Light blue theme stylesheet
 │   └── js/main.js          # Chat, quiz, animations, interactivity
-└── templates/
-    └── index.html          # Single-page application
+├── templates/
+│   └── index.html          # Single-page application
+└── tests/
+    ├── __init__.py
+    └── test_app.py         # 35+ comprehensive tests
 ```
 
 ---

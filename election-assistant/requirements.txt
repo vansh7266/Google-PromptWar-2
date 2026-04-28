@@ -1,25 +1,20 @@
-# ─────────────────────────────────────────────
-# Election Process Education Assistant
-# Python Dependencies  (FastAPI edition)
-# ─────────────────────────────────────────────
-
-# Web framework — async, fast, type-safe
+# Web framework
 fastapi==0.115.0
 
-# ASGI server (replaces gunicorn+Flask)
+# ASGI server
 uvicorn[standard]==0.30.6
 
-# Rate limiting for FastAPI (slowapi)
+# Rate limiting
 slowapi==0.1.9
 
-# Google Vertex AI SDK (includes Gemini)
+# Google Vertex AI SDK
 google-cloud-aiplatform==1.60.0
 vertexai==1.60.0
 
-# Pydantic v2 (bundled with FastAPI, pinned for clarity)
+# Pydantic v2
 pydantic==2.8.2
 
-# Template engine (Jinja2 — same as before)
+# Template engine
 jinja2==3.1.4
 
 # Static file serving
@@ -28,5 +23,7 @@ aiofiles==24.1.0
 # Utility
 python-dotenv==1.0.1
 
+# Testing
 pytest==8.3.2
 httpx==0.27.0
+pytest-asyncio==0.23.8

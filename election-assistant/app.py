@@ -1,7 +1,7 @@
 """
 Election Process Education Assistant
 --------------------------------------
-FastAPI backend powered by Vertex AI (Gemini 1.5 Flash).
+FastAPI backend powered by Vertex AI (Gemini 2.5 Flash Lite).
 Helps users understand India's election process interactively.
 """
 
@@ -11,6 +11,8 @@ import json
 import logging
 import os
 import re
+import time
+import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
 from functools import partial
@@ -36,10 +38,12 @@ from vertexai.generative_models import (
 )
 
 # Google Services used:
-#   - Vertex AI (Gemini 1.5 Flash): AI chat and quiz generation
+#   - Vertex AI (Gemini 2.5 Flash Lite): AI chat and quiz generation
 #   - Cloud Run: serverless deployment
 #   - Cloud Build: container image CI/CD
 #   - GCR: container registry
+#   - Google Fonts: Plus Jakarta Sans + Playfair Display
+#   - Google Translate Widget: multi-language support
 
 logging.basicConfig(
     level=logging.INFO,
@@ -50,7 +54,7 @@ logger = logging.getLogger(__name__)
 # Environment
 GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "")
 GCP_LOCATION = os.environ.get("GCP_LOCATION", "us-central1")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash-lite")
 
 if not GCP_PROJECT_ID:
     logger.warning("GCP_PROJECT_ID is not set. Vertex AI calls will fail.")
@@ -176,6 +180,19 @@ class QuizResponse(BaseModel):
     status: str = "success"
 
 
+class FeedbackRequest(BaseModel):
+    """Request body for POST /api/feedback."""
+    message_id: str = Field(min_length=1, max_length=100)
+    rating: Literal["helpful", "not_helpful"]
+    comment: str = Field(default="", max_length=500)
+
+
+class FeedbackResponse(BaseModel):
+    """Response body for POST /api/feedback."""
+    received: bool = True
+    status: str = "success"
+
+
 class ErrorResponse(BaseModel):
     """Standard error response body."""
     error: str
@@ -188,6 +205,19 @@ limiter = Limiter(
     default_limits=["200/day", "50/hour"],
     storage_uri="memory://",
 )
+
+
+# Request ID middleware for tracing
+class RequestIdMiddleware(BaseHTTPMiddleware):
+    """Attaches a unique X-Request-ID to every request/response for tracing."""
+
+    async def dispatch(self, request: Request, call_next):
+        """Inject request ID into response headers."""
+        request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+        request.state.request_id = request_id
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
+        return response
 
 
 # Security headers middleware
@@ -213,7 +243,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next) -> JSONResponse:
         """Add security headers to every response."""
+        start_time = time.monotonic()
         response = await call_next(request)
+        duration_ms = (time.monotonic() - start_time) * 1000
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
@@ -221,6 +253,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
         response.headers["Content-Security-Policy"] = self.CSP
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Server-Timing"] = f"total;dur={duration_ms:.1f}"
         if request.url.path.startswith("/api/"):
             response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
         return response
@@ -230,7 +263,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application startup and shutdown lifecycle."""
-    logger.info("VoteIndiaSmart starting up...")
+    logger.info("VoteIndiaSmart starting up — model: %s", GEMINI_MODEL)
     yield
     logger.info("VoteIndiaSmart shutting down...")
 
@@ -240,9 +273,9 @@ app = FastAPI(
     title="VoteSmart India — Election Education Assistant",
     description=(
         "AI-powered guide to India's election process. "
-        "Built on Vertex AI (Gemini 1.5 Flash) and deployed on Google Cloud Run."
+        "Built on Vertex AI (Gemini 2.5 Flash Lite) and deployed on Google Cloud Run."
     ),
-    version="2.0.0",
+    version="2.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
@@ -252,13 +285,14 @@ app = FastAPI(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Middleware
+# Middleware (outermost last)
+app.add_middleware(RequestIdMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_headers=["Content-Type", "X-Request-ID"],
 )
 
 # Rate-limit error handler
@@ -289,7 +323,9 @@ async def health_check() -> JSONResponse:
         content={
             "status": "ok",
             "service": "election-assistant",
-            "version": "2.0.0",
+            "version": "2.1.0",
+            "model": GEMINI_MODEL,
+            "model_ready": gemini_model is not None,
         },
         headers={"Cache-Control": "public, max-age=30"},
     )
@@ -444,6 +480,29 @@ Rules:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Could not generate a quiz question. Please try again.",
         )
+
+
+@app.post(
+    "/api/feedback",
+    response_model=FeedbackResponse,
+    summary="Submit feedback on AI response",
+    description="Rate an AI response as helpful or not helpful.",
+    tags=["Feedback"],
+)
+@limiter.limit("60/minute")
+async def submit_feedback(request: Request, body: FeedbackRequest) -> FeedbackResponse:
+    """Log user feedback on AI responses for quality monitoring."""
+    content_type = request.headers.get("content-type", "")
+    if "application/json" not in content_type:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Content-Type must be application/json.",
+        )
+    logger.info(
+        "Feedback received: message_id=%s rating=%s comment=%.100s",
+        body.message_id, body.rating, body.comment,
+    )
+    return FeedbackResponse()
 
 
 # Exception handlers

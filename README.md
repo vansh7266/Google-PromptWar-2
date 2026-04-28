@@ -3,6 +3,8 @@
 An AI-powered web application that helps Indian citizens understand the election process
 in an interactive, easy-to-follow way. Built for the **Google Prompt War 2026** hackathon.
 
+**Live:** [election-assistant on Cloud Run](https://election-assistant-684691465342.us-central1.run.app)
+
 ---
 
 ## 📌 Chosen Vertical
@@ -16,7 +18,7 @@ all through an interactive AI-powered assistant.
 ## 🧠 Approach & Logic
 
 The solution uses a **FastAPI backend** served on **Google Cloud Run**, powered by
-**Vertex AI (Gemini 1.5 Flash)** to answer natural language questions about Indian elections.
+**Vertex AI (Gemini 2.5 Flash Lite)** to answer natural language questions about Indian elections.
 
 ### Key Design Decisions
 
@@ -43,14 +45,15 @@ FastAPI App (Cloud Run — uvicorn ASGI)
      ├─ GET  /health     → Cloud Run health probe
      ├─ GET  /docs       → Swagger UI (auto-generated)
      ├─ POST /api/chat   → Vertex AI Gemini → AI election answer
-     └─ POST /api/quiz   → Vertex AI Gemini → AI-generated MCQ
+     ├─ POST /api/quiz   → Vertex AI Gemini → AI-generated MCQ
+     └─ POST /api/feedback→ Log user feedback on AI quality
 ```
 
 ### Features
 
 | Feature | Description |
 |---|---|
-| 🤖 AI Chat | Ask any election question; answered by Gemini 1.5 Flash |
+| 🤖 AI Chat | Ask any election question; answered by Gemini 2.5 Flash Lite |
 | 📅 Interactive Timeline | 6-phase visual journey from announcement to results |
 | 🧩 Process Cards | 8 key concepts — click to get an AI explanation |
 | 🎯 Knowledge Quiz | AI-generated MCQ, 3 difficulty levels |
@@ -58,6 +61,8 @@ FastAPI App (Cloud Run — uvicorn ASGI)
 | 🔗 Official Resources | Direct links to ECI, NVSP, Voter Portal, Helpline 1950 |
 | 📄 API Docs | Auto-generated Swagger UI at `/docs` |
 | 🗳️ Floating Chat FAB | Quick access floating button to AI assistant |
+| 👍 AI Feedback | Thumbs up/down on AI responses for quality tracking |
+| 🔍 Request Tracing | X-Request-ID + Server-Timing on every response |
 | 🌐 Google Translate | Multi-language support for 10 Indian languages |
 
 ---
@@ -76,6 +81,8 @@ FastAPI App (Cloud Run — uvicorn ASGI)
   - `Content-Security-Policy` (strict, no unsafe-inline)
   - `Strict-Transport-Security` (HSTS)
   - `Permissions-Policy`
+  - `X-Request-ID` (request tracing)
+  - `Server-Timing` (performance monitoring)
   - `Referrer-Policy`
   - `Cache-Control` (no-store on API routes)
 - **Non-root Docker user** — app runs as `appuser`, never as root
@@ -101,7 +108,7 @@ FastAPI App (Cloud Run — uvicorn ASGI)
 
 | Service | Usage |
 |---|---|
-| **Vertex AI (Gemini 1.5 Flash)** | AI Chat + Quiz generation |
+| **Vertex AI (Gemini 2.5 Flash Lite)** | AI Chat + Quiz generation |
 | **Google Cloud Run** | Serverless auto-scaling deployment |
 | **Google Cloud Build** | Container image building + CI |
 | **Google Fonts** | Plus Jakarta Sans + Playfair Display typography |
@@ -119,13 +126,15 @@ cd election-assistant
 pytest tests/ -v
 ```
 
-The test suite includes 35+ tests covering:
-- Health check & routing
-- Security headers (HSTS, CSP, X-Frame-Options, etc.)
-- Chat API validation & mocked success
-- Quiz API validation & mocked success
-- Input sanitisation unit tests
-- Static file serving
+The test suite includes **52 tests** covering:
+- Health check & routing (8 tests)
+- Security headers — HSTS, CSP, X-Request-ID, Server-Timing (10 tests)
+- Chat API validation & mocked success (11 tests)
+- Quiz API validation & mocked success (11 tests)
+- Feedback endpoint (5 tests)
+- Input sanitisation unit tests (8 tests)
+- Static file serving (2 tests)
+- HTML content structure (5 tests)
 
 ---
 
@@ -183,7 +192,7 @@ gcloud run deploy election-assistant \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated \
-  --set-env-vars GCP_PROJECT_ID=$PROJECT_ID,GCP_LOCATION=us-central1,GEMINI_MODEL=gemini-1.5-flash \
+  --set-env-vars GCP_PROJECT_ID=$PROJECT_ID,GCP_LOCATION=us-central1,GEMINI_MODEL=gemini-2.5-flash-lite \
   --memory 512Mi \
   --cpu 1 \
   --min-instances 0 \
@@ -197,7 +206,7 @@ gcloud run deploy election-assistant \
 1. The target audience is Indian citizens, primarily first-time voters.
 2. Information is based on publicly available ECI data (2024 General Elections).
 3. The application is educational only — it does not store any user data.
-4. Vertex AI (Gemini 1.5 Flash) is available in the `us-central1` region.
+4. Vertex AI (Gemini 2.5 Flash Lite) is available in the `us-central1` region.
 
 ---
 
@@ -217,9 +226,9 @@ election-assistant/
 │   └── js/main.js          # Chat, quiz, animations, interactivity
 ├── templates/
 │   └── index.html          # Single-page application
-└── tests/
+└── tests/                  # 52 comprehensive tests
     ├── __init__.py
-    └── test_app.py         # 35+ comprehensive tests
+    └── test_app.py         # 52 comprehensive tests
 ```
 
 ---
